@@ -12,6 +12,7 @@ class FamilyStructure:
     def __init__(self, last_name):
         self.last_name = last_name
         # example list of members
+        # Generamos los objetos con cada miembro de la familia y sus características
         self._members = [{
             "id": self._generateId(),
             "first_name": "John",
@@ -38,19 +39,40 @@ class FamilyStructure:
     def _generateId(self):
         return randint(0, 99999999)
 
-    def add_member(self, member):
-        # fill this method and update the return
+    def add_member(self, new_member):
+        # Estamos fijando que last name sea el mismo para todos los miembros
+        new_member["last_name"] = self.last_name
+        # Lo añadimos al array de miembros
+        self._members.append(new_member)
+        # Devolvemos el miembro nuevo
+        return new_member
+
         pass
 
     def delete_member(self, id):
-        # fill this method and update the return
-        pass
+
+        for member in self._members:
+          if member["id"] == id :
+              self._members.remove(member)
+              return member
+        #   else :
+        #       member_id_not_found = {}
+        #       return member_id_not_found
+          
+        # Hacemos un for para buscar el id que queramos eliminar, comparamos los id y si coincide, elimina el member con ese 
+        #   del array de members y retornamos el member a eliminar en la funcion del app.
 
     def get_member(self, id):
         # print(id)
+        # La función recorre self.members y por cada miembro busca si el id es igual al id del la ruta del enlace, si coincide 
+        # mostrar el miembro de la familia con el id que coincide. Le pasamos el parametro a app.py en la ruta member/id
         for one_member in self._members:
           if one_member["id"] == id :
               return one_member
+          else :
+            member_id_not_found = {}
+            return member_id_not_found
+          
 
     # this method is done, it returns a list with all the family members
     def get_all_members(self):
