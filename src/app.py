@@ -52,38 +52,52 @@ def get_one_member(member_id):
     # En la respuesta en el body creamos una propiedad que se llame member y queremos que sea el 
     # Primero retornar respuesta con status code
     if member == {} :
-        return jsonify("El usuario no existe"), 404
+        return jsonify("The user doesn't exist"), 404
     else : 
         return jsonify(response_body), 200
 
 @app.route('/member', methods=['POST'])
 # Hemos importado el request para poder usar el request body ya en formato json.
 def add_one_member():
-    # El request_body o cuerpo de la solicitud ya está decodificado en formato JSON y se encuentra en la variable request.json
-    request_body = request.json
-    # Creamos la plantilla que utilizará el request body para que la respuesta sea esa 
-    # Creamos la variable new_member con las caracteristicas y lo que el request body tiene que traer:
-    # En el caso del ID recurrimos a la función generateId para generar el random id
-    new_member = {
-        "first_name" : request_body["first_name"],
-        "age" : request_body["age"],
-        "lucky_numbers" : request_body["lucky_numbers"],
-        "id" : jackson_family._generateId(),
+    # try lo usamos para que el bloque de codigo que está dentro puedan ocurrir excepciones, como en este caso que falte un
+    # keyError y podamos enviar el error 400 y no el que envia por defecto que es el 500.
+    # Metemos dentro de try todo el codigo y fuera ponemos exception (ver mas abajo):
+    try : 
+        # El request_body o cuerpo de la solicitud ya está decodificado en formato JSON y se encuentra en la variable request.json
+        request_body = request.json
+
+        # Para que si no todos los campos estan rellenos aparezca un error 400 diciendo que faltan campos
+        required_fields = ["first_name", "age", "lucky_numbers"]
+        if not all(field in request_body for field in required_fields):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Creamos la plantilla que utilizará el request body para que la respuesta sea esa 
+        # Creamos la variable new_member con las caracteristicas y lo que el request body tiene que traer:
+        # En el caso del ID recurrimos a la función generateId para generar el random id
+        new_member = {
+            "first_name" : request_body["first_name"],
+            "age" : request_body["age"],
+            "lucky_numbers" : request_body["lucky_numbers"],
+            "id" : jackson_family._generateId(),
         }
-    # Aqui recurrimos a la función add_member del datastrcuture y le añadimos el new_member con el append de la funcion del data
-    jackson_family.add_member(new_member)
-    # Buena practica siempre en el response_body poner que estamos devolviendo 
+    
+    
+        # Aqui recurrimos a la función add_member del datastrcuture y le añadimos el new_member con el append de la funcion del data
+        jackson_family.add_member(new_member)
+        # Buena practica siempre en el response_body poner que estamos devolviendo 
 
-    # amoldarlo esto despues del response como el get 
-    # Para que si no todos los campos estan rellenos aparezca un error 400 diciendo que faltan campos
-    # required_fields = ["first_name", "age", "lucky_numbers"]
-    # if not all(field in request_body for field in required_fields):
-    #     return jsonify({"error": "Missing required fields"}), 400
+        response_body = {
+            "new_member" : new_member
+        }
 
-    response_body = {
-        "new_member" : new_member
-    }
-    return jsonify(response_body), 200
+        return jsonify(response_body), 200
+    # Codigo referido a que si ocurre el error KeyError nos aparezca un mensaje 400 con lo que queremos, que en este caso es 
+    # Missing required field
+    except KeyError as e:
+        # Capturar el KeyError y responder con un error 400
+        # La expresión e.args[0] accede al primer argumento de la excepción KeyError, que es la clave que no pudo ser encontrada.
+        # Una f-string es una forma de formatear cadenas que permite la interpolación de expresiones dentro de llaves {} directamente en la cadena. Por eso esta la f antes de missing para poder evaluar e.args[0]
+        return jsonify({"error": f"Missing required field: {e.args[0]}"}), 400
 
 @app.route('/member/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
@@ -93,7 +107,13 @@ def delete_member(member_id):
     response_body = {
     "done": True
     }
-    return jsonify(response_body), 200
+    
+    if member_to_delete == {} :
+        return jsonify("The user doesn't exist"), 404
+    else : 
+        return jsonify(response_body), 200
+
+
 
 
 # this only runs if `$ python src/app.py` is executed

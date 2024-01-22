@@ -55,9 +55,9 @@ class FamilyStructure:
           if member["id"] == id :
               self._members.remove(member)
               return member
-        #   else :
-        #       member_id_not_found = {}
-        #       return member_id_not_found
+          else :
+              member_id_not_found = {}
+              return member_id_not_found
           
         # Hacemos un for para buscar el id que queramos eliminar, comparamos los id y si coincide, elimina el member con ese 
         #   del array de members y retornamos el member a eliminar en la funcion del app.
